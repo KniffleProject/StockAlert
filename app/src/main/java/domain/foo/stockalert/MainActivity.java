@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getQuotes(String interval, String symbol) {
-        timeSeries = "TIME_SERIES_MONTHLY";
+        interval = "TIME_SERIES_MONTHLY";
         symbol = "MSFT";
         ApiRequest ar = new ApiRequest(MainActivity.this);
         ar.execute("https://www.alphavantage.co/query?function=+"interval+"&symbol="+symbol+"&apikey=demo");
