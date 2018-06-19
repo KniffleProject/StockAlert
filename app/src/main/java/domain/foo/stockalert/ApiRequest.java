@@ -18,8 +18,8 @@ import java.nio.charset.Charset;
  */
 
 public class ApiRequest extends AsyncTask<String,Integer,Void> {
-    JSONObject json;
 
+    private JSONObject json;
     private MainActivity activity;
 
     public ApiRequest(MainActivity activity) {
