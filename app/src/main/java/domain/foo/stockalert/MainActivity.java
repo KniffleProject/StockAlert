@@ -2,31 +2,60 @@ package domain.foo.stockalert;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.*;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
-    private String m_Text = "";
+    private String symbol = "";
+    private ArrayList<Equity> equityList;
+    private CustomAdapter lvAdapter;
+    private ListView equityListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        createAdapter();
+    }
+
+    public void createAdapter() {
+        equityList = new ArrayList<Equity>();
+
+        lvAdapter = new CustomAdapter(equityList, getApplicationContext());
+        equityListView = (ListView)findViewById(R.id.equityList);
+        equityListView.setAdapter(lvAdapter);
+
+        equityListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            public void onItemClick(AdapterView<?> parent, View arg1,int position, long id)
+            {
+                Equity equity  = (Equity)parent.getAdapter().getItem(position);
+                String symbol = equity.getSymbol();
+                Intent detailActivity = new Intent(MainActivity.this, DetailActivity.class);
+                detailActivity.putExtra("SYMBOL", symbol);
+                startActivity(detailActivity);
+            }
+        });
     }
 
     @Override
@@ -72,6 +101,8 @@ public class MainActivity extends AppCompatActivity {
             String date = (String)b.next();
             JSONObject values = (JSONObject) dates.get(date);
             Toast.makeText(MainActivity.this, "Course("+ date +") is "+values.get("1. open")+" at "+interval+" interval.",Toast.LENGTH_LONG).show();
+            equityList.add(new Equity(symbol,values.get("1. open").toString()));
+            lvAdapter.notifyDataSetChanged();
         } catch (JSONException e) {
             e.printStackTrace();
             Toast.makeText(MainActivity.this, "Symbol not found.",Toast.LENGTH_LONG).show();
@@ -81,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void addSymbol(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("The name of the equity of your choice. For example: MSFT");
+        builder.setTitle("The name of the equityList of your choice. For example: MSFT");
 
         // Set up the input
         final EditText input = new EditText(this);
@@ -94,8 +125,8 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                m_Text = input.getText().toString();
-                getQuotes("TIME_SERIES_MONTHLY",m_Text);
+                symbol = input.getText().toString();
+                getQuotes("TIME_SERIES_MONTHLY", symbol);
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
