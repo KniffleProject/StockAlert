@@ -1,5 +1,14 @@
 package domain.foo.stockalert;
 
+import com.google.gson.Gson;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+
+
 /**
  * Created by hechtpapst on 19.06.2018.
  */
@@ -7,11 +16,54 @@ package domain.foo.stockalert;
 public class Equity {
 
     private String symbol;
-    private String price;
+    private String latestClose;
+    private String latestDate;
+    private String lastRefreshed="";
+    private String timeZone="";
+    private String latestInterval="";
+    private ArrayList<Observation> stock= new ArrayList<>();
 
-    public Equity(String symbol, String price){
+    public String getLatestDate() {
+        return latestDate;
+    }
+
+    public String getLastRefreshed() {
+        return lastRefreshed;
+    }
+
+    public String getLatestInterval() {
+        return latestInterval;
+    }
+
+
+    class Observation{
+        double open;
+        double close;
+        double high;
+        double low;
+        double volume;
+        String datetime;
+
+        //Datetime fehlt. Einheitliches Format wäre günstig. Ich weiß noch nicht wie die Graphbibliothek das haben möchte.
+        public Observation(double open, double high, double low, double close, double volume){
+            this.open = open;
+            this.close = close;
+            this.low=low;
+            this.high=high;
+            this.volume=volume;
+        }
+    }
+
+
+    public Equity(String symbol, String price) {
         this.symbol = symbol;
-        this.price = price;
+        this.latestClose = price;
+    }
+
+    public Equity(JSONObject response){
+        if(response!=null) {
+            fillFromJson(response);
+        }
     }
 
     public String getSymbol() {
@@ -22,11 +74,76 @@ public class Equity {
         this.symbol = symbol;
     }
 
-    public String getPrice() {
-        return price;
+    public String getLatestClose() {
+        return latestClose;
     }
 
     public void setPrice(String price) {
-        this.price = price;
+        this.latestClose = price;
+    }
+
+    public String gsonMe(){
+        String json ="";
+        Gson gson = new Gson();
+        json = gson.toJson(this);
+        return json;
+    }
+
+    public void fillFromJson(JSONObject json) {
+        try {
+            String interval ="";
+            String timeseries ="";
+            Iterator<String> response = json.keys();
+            while (response.hasNext()) {
+                interval = (String) response.next();
+                if(interval.equals("Meta Data")){
+                    JSONObject meta = (JSONObject) json.get(interval);
+                    symbol=(String) meta.get("2. Symbol");
+                    lastRefreshed= (String) meta.get("3. Last Refreshed");
+                    timeZone =(String) meta.get("4. Time Zone");
+                }
+            }
+            JSONObject dataSeries = (JSONObject) json.get(interval);
+            latestInterval=interval;
+            Iterator<String> observations = dataSeries.keys();
+            while (observations.hasNext()) {
+                JSONObject observationData = null;
+                String datetime=observations.next();
+                observationData = (JSONObject) dataSeries.get(datetime);
+                Iterator<String> keys = observationData.keys();
+                double open=0;
+                double close=0;
+                double high=0;
+                double low=0;
+                double volume=0;
+                while (keys.hasNext()) {
+                    String key = keys.next();
+                    switch (key) {
+                        case "1. open":
+                            open = Double.parseDouble((String) observationData.get(key));
+                            break;
+                        case "2. high":
+                            high = Double.parseDouble((String) observationData.get(key));
+                            break;
+                        case "3. low":
+                            low = Double.parseDouble((String) observationData.get(key));
+                            break;
+                        case "4. close":
+                            close = Double.parseDouble((String) observationData.get(key));
+                            break;
+                        case "5. volume":
+                            volume = Double.parseDouble((String) observationData.get(key));
+                            break;
+                    }
+                }
+                Observation newEntry = new Observation(open,high,low,close,volume);
+                stock.add(newEntry);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+        }
+        latestClose =""+stock.get(1).close;
+        latestDate ="Platzhalter"; //+stock.get(1).datetime;
     }
 }

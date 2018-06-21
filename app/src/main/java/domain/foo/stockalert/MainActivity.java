@@ -42,17 +42,16 @@ public class MainActivity extends AppCompatActivity {
         equityList = new ArrayList<Equity>();
 
         lvAdapter = new CustomAdapter(equityList, getApplicationContext());
-        equityListView = (ListView)findViewById(R.id.equityList);
+        equityListView = (ListView) findViewById(R.id.equityList);
         equityListView.setAdapter(lvAdapter);
 
-        equityListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
-        {
-            public void onItemClick(AdapterView<?> parent, View arg1,int position, long id)
-            {
-                Equity equity  = (Equity)parent.getAdapter().getItem(position);
+        equityListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View arg1, int position, long id) {
+                Equity equity = (Equity) parent.getAdapter().getItem(position);
                 String symbol = equity.getSymbol();
                 Intent detailActivity = new Intent(MainActivity.this, DetailActivity.class);
                 detailActivity.putExtra("SYMBOL", symbol);
+                detailActivity.putExtra("EQUITY_JSON", equity.gsonMe());
                 startActivity(detailActivity);
             }
         });
@@ -70,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
+
     /***********************************
      * interval: TIME_SERIES_MONTHLY, TIME_SERIES_INTRADAY ...
      * symbol: Aktienkürzel z.B. AAPL, MSTF, ...
@@ -78,39 +78,27 @@ public class MainActivity extends AppCompatActivity {
      * *********************************/
     public void getQuotes(String interval, String symbol) {
         ApiRequest ar = new ApiRequest(MainActivity.this);
-        ar.execute("https://www.alphavantage.co/query?function="+interval+"&symbol="+symbol+"&apikey=CEVLFXSSNL84YSA5");
+        ar.execute("https://www.alphavantage.co/query?function=" + interval + "&symbol=" + symbol + "&apikey=CEVLFXSSNL84YSA5");
         System.out.println("String");
     }
 
     /*************************************
      * Wird aufgerufen sobald Daten da sind
      * **********************************/
-    public void requestDone(JSONObject q){
-        String interval="";
-        try {
-            Iterator<String> jsonInfo = q.keys();
-            while(jsonInfo.hasNext()) {
-                interval = (String) jsonInfo.next();
-            }
-            JSONObject dates = (JSONObject) q.get(interval);
-            Iterator<String> b = dates.keys();
-            //while(b.hasNext()) {
-            //    System.out.println( (String)b.next());
-            //}
-
-            String date = (String)b.next();
-            JSONObject values = (JSONObject) dates.get(date);
-            Toast.makeText(MainActivity.this, "Course("+ date +") is "+values.get("1. open")+" at "+interval+" interval.",Toast.LENGTH_LONG).show();
-            equityList.add(new Equity(symbol,values.get("1. open").toString()));
+    public void requestDone(JSONObject q) {
+        String interval = "";
+        String debugHelper = "";
+        if (q != null) {
+            Equity eq = new Equity(q);
+            Toast.makeText(MainActivity.this, "Course(" + eq.getLatestDate() + ") is " + eq.getLatestClose() + " at " + eq.getLatestInterval() + " interval.", Toast.LENGTH_LONG).show();
+            equityList.add(eq);
             lvAdapter.notifyDataSetChanged();
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Toast.makeText(MainActivity.this, "Symbol not found.",Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(MainActivity.this, "Symbol not found.", Toast.LENGTH_LONG).show();
         }
-        System.out.print("");
     }
 
-    private void addSymbol(){
+    private void addSymbol() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("The name of the equityList of your choice. For example: MSFT");
 
