@@ -4,7 +4,7 @@ android {
     compileSdkVersion 26
     defaultConfig {
         applicationId "domain.foo.stockalert"
-        minSdkVersion 15
+        minSdkVersion 19
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
@@ -27,4 +27,5 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'com.googlecode.json-simple:json-simple:1.1'
     implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.github.AnyChart:AnyChart-Android:0.2.7'
 }

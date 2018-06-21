@@ -1,11 +1,22 @@
 package domain.foo.stockalert;
 
+import android.support.annotation.NonNull;
+
+import com.anychart.anychart.DateTime;
 import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.Iterator;
 
 
@@ -25,35 +36,46 @@ public class Equity {
 
     private ArrayList<Observation> stock= new ArrayList<>();
 
-    public String getLatestDate() {
-        return latestDate;
-    }
-
-    public String getLastRefreshed() {
-        return lastRefreshed;
-    }
-
-    public String getLatestInterval() {
-        return latestInterval;
-    }
-
-
-    class Observation{
+    class Observation implements Comparable<Observation>{
         double open;
         double close;
         double high;
         double low;
         double volume;
-        String datetime;
+        Date datetime;
 
-        //Datetime fehlt. Einheitliches Format wäre günstig. Ich weiß noch nicht wie die Graphbibliothek das haben möchte.
-        public Observation(double open, double high, double low, double close, double volume){
+
+        public Observation(double open, double high, double low, double close, double volume, String datetime){
             this.open = open;
             this.close = close;
             this.low=low;
             this.high=high;
             this.volume=volume;
+            if (datetime.length()<11){
+                datetime+=" 00:00:00";
+            }
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            try {
+                this.datetime = formatter.parse(datetime);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
+
+        @Override
+        public int compareTo(@NonNull Observation o) {
+            return this.datetime.compareTo(o.datetime);
+        }
+    }
+
+
+    public void sortStockByDate(){
+        Collections.sort(stock, new Comparator<Observation>(){
+            @Override
+            public int compare(Observation o1, Observation o2) {
+                return o1.compareTo(o2);
+            }
+        });
     }
 
 
@@ -75,6 +97,21 @@ public class Equity {
 
     public long getId(){return id;}
 
+    public String getLatestDate() {
+        return latestDate;
+    }
+
+    public String getLastRefreshed() {
+        return lastRefreshed;
+    }
+
+    public String getLatestInterval() {
+        return latestInterval;
+    }
+
+    public ArrayList<Observation> getStock(){
+        return stock;
+    }
 
     public String getSymbol() {
         return symbol;
@@ -146,7 +183,7 @@ public class Equity {
                             break;
                     }
                 }
-                Observation newEntry = new Observation(open,high,low,close,volume);
+                Observation newEntry = new Observation(open,high,low,close,volume, datetime);
                 stock.add(newEntry);
             }
         } catch (JSONException e) {
@@ -157,6 +194,10 @@ public class Equity {
         latestDate ="Platzhalter"; //+stock.get(1).datetime;
 
         }
+
+    public void addObservation(Observation obs){
+        stock.add(obs);
+    }
 
     public String getPrice() {
         return latestClose;
