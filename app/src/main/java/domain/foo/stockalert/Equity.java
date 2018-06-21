@@ -16,8 +16,6 @@ import java.util.Iterator;
 public class Equity {
 
     private String symbol;
-<<<<<<< HEAD
-    private String latesstClose;
     private String latestClose;
     private String latestDate;
     private String lastRefreshed="";
