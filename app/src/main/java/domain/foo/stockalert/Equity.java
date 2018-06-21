@@ -57,28 +57,16 @@ public class Equity {
     }
 
 
-    public Equity(String symbol, String price) {
-        this.symbol = symbol;
-        this.latestClose = price;
-    }
-
-    public Equity(JSONObject response){
     public Equity(JSONObject response) {
         if (response != null) {
             fillFromJson(response);
         }
     }
-    private double price;
-    private long id;
-    private String date;
 
 
     public Equity(long id, String symbol, double latestClose, String latestDate, String timezone){
         this.id = id;
         this.symbol = symbol;
-        this.price = price;
-        this.date = date;
-        this.timezone = timezone;
         this.latestClose = ""+ latestClose;
         this.latestDate = latestDate;
         this.timeZone = timezone;
@@ -170,14 +158,10 @@ public class Equity {
 
         }
 
-    public double getPrice() {
     public String getPrice() {
         return latestClose;
     }
 
-    public void setPrice(double price) {
-        this.price = price;
->>>>>>> 6c6dd0c4e5a83566984601d17e6d71aa1723e871
 
     public String getDate() {
         return latestDate;
