@@ -63,9 +63,12 @@ public class Equity {
 
     public Equity(JSONObject response){
         if(response!=null) {
+    public Equity(JSONObject response) {
+        if (response != null) {
             fillFromJson(response);
         }
 =======
+    }
     private double price;
     private long id;
     private String date;
@@ -79,6 +82,7 @@ public class Equity {
         this.date = date;
         this.timezone = timezone;
 >>>>>>> 6c6dd0c4e5a83566984601d17e6d71aa1723e871
+
     }
 
     public long getId(){return id;}
@@ -165,6 +169,9 @@ public class Equity {
         latestClose =""+stock.get(1).close;
         latestDate ="Platzhalter"; //+stock.get(1).datetime;
 =======
+
+        }
+
     public double getPrice() {
         return price;
     }
