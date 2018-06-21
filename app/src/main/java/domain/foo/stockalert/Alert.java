@@ -5,13 +5,13 @@ package domain.foo.stockalert;
 public class Alert {
     long alert_id;
     int pricelimit;
-    Boolean alert;
+    //Boolean alert;
     long stock_id;
 
     public  Alert (long alert_id, int pricelimit, long stock_id){
         this.alert_id = alert_id;
         this.pricelimit = pricelimit;
-        this.alert = alert;
+        //this.alert = alert;
         this.stock_id = stock_id;
 
     }
@@ -24,9 +24,9 @@ public class Alert {
 
     public void setPricelimit(int pricelimit) { this.pricelimit = pricelimit; }
 
-    public Boolean getAlert() {return alert;}
+    //public Boolean getAlert() {return alert;}
 
-    public void setAlert(Boolean alert) { this.alert = alert; }
+    //public void setAlert(Boolean alert) { this.alert = alert; }
 
     public long getStockID() {return stock_id;}
 
