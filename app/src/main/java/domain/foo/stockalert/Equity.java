@@ -17,11 +17,13 @@ public class Equity {
 
     private String symbol;
 <<<<<<< HEAD
-    private String latestClose;
+    private String latesstClose;
     private String latestDate;
     private String lastRefreshed="";
     private String timeZone="";
     private String latestInterval="";
+    private long id;
+
     private ArrayList<Observation> stock= new ArrayList<>();
 
     public String getLatestDate() {
@@ -62,26 +64,25 @@ public class Equity {
     }
 
     public Equity(JSONObject response){
-        if(response!=null) {
     public Equity(JSONObject response) {
         if (response != null) {
             fillFromJson(response);
         }
-=======
     }
     private double price;
     private long id;
     private String date;
-    private String timezone;
 
 
-    public Equity(long id, String symbol, double price, String date, String timezone){
+    public Equity(long id, String symbol, double latestClose, String latestDate, String timezone){
         this.id = id;
         this.symbol = symbol;
         this.price = price;
         this.date = date;
         this.timezone = timezone;
->>>>>>> 6c6dd0c4e5a83566984601d17e6d71aa1723e871
+        this.latestClose = ""+ latestClose;
+        this.latestDate = latestDate;
+        this.timeZone = timezone;
 
     }
 
@@ -96,7 +97,6 @@ public class Equity {
         this.symbol = symbol;
     }
 
-<<<<<<< HEAD
     public String getLatestClose() {
         return latestClose;
     }
@@ -168,32 +168,31 @@ public class Equity {
         }
         latestClose =""+stock.get(1).close;
         latestDate ="Platzhalter"; //+stock.get(1).datetime;
-=======
 
         }
 
     public double getPrice() {
-        return price;
+    public String getPrice() {
+        return latestClose;
     }
 
     public void setPrice(double price) {
         this.price = price;
 >>>>>>> 6c6dd0c4e5a83566984601d17e6d71aa1723e871
-    }
 
     public String getDate() {
-        return date;
+        return latestDate;
     }
 
     public void setDate(String date) {
-        this.date = date;
+        this.latestDate = date;
     }
 
     public String getTimezone() {
-        return timezone;
+        return timeZone;
     }
 
     public void setTimezone(String timezone) {
-        this.timezone = timezone;
+        this.timeZone = timezone;
     }
 }
