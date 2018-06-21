@@ -16,6 +16,7 @@ import java.util.Iterator;
 public class Equity {
 
     private String symbol;
+<<<<<<< HEAD
     private String latestClose;
     private String latestDate;
     private String lastRefreshed="";
@@ -64,7 +65,24 @@ public class Equity {
         if(response!=null) {
             fillFromJson(response);
         }
+=======
+    private double price;
+    private long id;
+    private String date;
+    private String timezone;
+
+
+    public Equity(long id, String symbol, double price, String date, String timezone){
+        this.id = id;
+        this.symbol = symbol;
+        this.price = price;
+        this.date = date;
+        this.timezone = timezone;
+>>>>>>> 6c6dd0c4e5a83566984601d17e6d71aa1723e871
     }
+
+    public long getId(){return id;}
+
 
     public String getSymbol() {
         return symbol;
@@ -74,6 +92,7 @@ public class Equity {
         this.symbol = symbol;
     }
 
+<<<<<<< HEAD
     public String getLatestClose() {
         return latestClose;
     }
@@ -145,5 +164,29 @@ public class Equity {
         }
         latestClose =""+stock.get(1).close;
         latestDate ="Platzhalter"; //+stock.get(1).datetime;
+=======
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+>>>>>>> 6c6dd0c4e5a83566984601d17e6d71aa1723e871
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public String getTimezone() {
+        return timezone;
+    }
+
+    public void setTimezone(String timezone) {
+        this.timezone = timezone;
     }
 }
