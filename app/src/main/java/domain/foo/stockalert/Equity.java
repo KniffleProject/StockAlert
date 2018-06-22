@@ -21,13 +21,13 @@ import java.util.Iterator;
 
 
 /**
- * Created by hechtpapst on 19.06.2018.
+ * Created by hechtpapst on 22.06.2018.
  */
 
 public class Equity {
 
     private String symbol;
-    private String latestClose;
+    private double latestClose;
     private String latestDate;
     private String lastRefreshed="";
     private String timeZone="";
@@ -89,7 +89,7 @@ public class Equity {
     public Equity(long id, String symbol, double latestClose, String latestDate, String timezone){
         this.id = id;
         this.symbol = symbol;
-        this.latestClose = ""+ latestClose;
+        this.latestClose = latestClose;
         this.latestDate = latestDate;
         this.timeZone = timezone;
 
@@ -117,17 +117,11 @@ public class Equity {
         return symbol;
     }
 
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
-    }
-
-    public String getLatestClose() {
+    public double getLatestClose() {
         return latestClose;
     }
 
-    public void setPrice(String price) {
-        this.latestClose = price;
-    }
+
 
     public String gsonMe(){
         String json ="";
@@ -190,8 +184,8 @@ public class Equity {
             e.printStackTrace();
 
         }
-        latestClose =""+stock.get(1).close;
-        latestDate ="Platzhalter"; //+stock.get(1).datetime;
+        latestClose =stock.get(1).close;
+        latestDate =stock.get(1).datetime.toString();
 
         }
 
@@ -199,24 +193,17 @@ public class Equity {
         stock.add(obs);
     }
 
-    public String getPrice() {
+    public double getPrice() {
         return latestClose;
     }
 
-
     public String getDate() {
         return latestDate;
-    }
-
-    public void setDate(String date) {
-        this.latestDate = date;
     }
 
     public String getTimezone() {
         return timeZone;
     }
 
-    public void setTimezone(String timezone) {
-        this.timeZone = timezone;
-    }
+
 }

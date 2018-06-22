@@ -78,7 +78,7 @@ public class CustomAdapter extends ArrayAdapter<Equity> implements View.OnClickL
 
 
         viewHolder.symbol.setText(equity.getSymbol());
-        viewHolder.price.setText(equity.getLatestClose());
+        viewHolder.price.setText(""+equity.getLatestClose());
         // Return the completed view to render on screen
         return convertView;
     }

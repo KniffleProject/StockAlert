@@ -1,8 +1,17 @@
 package domain.foo.stockalert;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.WindowManager;
+import android.widget.EditText;
 
 import com.anychart.anychart.AnyChart;
 import com.anychart.anychart.AnyChartView;
@@ -32,6 +41,7 @@ public class DetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chart_common);
         AnyChartView anyChartView = findViewById(R.id.any_chart_view);
         anyChartView.setProgressBar(findViewById(R.id.progress_bar));
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
 
         Intent i = getIntent();
         Bundle b = i.getExtras();
@@ -51,6 +61,23 @@ public class DetailActivity extends AppCompatActivity {
         return eq;
     }
 
+    public void deleteSelf(MenuItem item){
+        setResult(Activity.RESULT_OK, new Intent().putExtra("EQ", eq.gsonMe()));
+        finish();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if ((getResources().getConfiguration().screenLayout &
+                Configuration.SCREENLAYOUT_SIZE_MASK) !=
+                Configuration.SCREENLAYOUT_SIZE_XLARGE) {
+            // Inflate the main_menu; this adds items to the action bar if it is present.
+            getMenuInflater().inflate(R.menu.detail_menu, menu);
+            // Find the menuItem to add your SubMenu
+            MenuItem myMenuItem = menu.findItem(R.id.detailsMenuDelete);
+        }
+        return true;
+    }
 
     private Set makeSeriesData(Equity eq) {
         ArrayList<DataEntry> dataSeries = new ArrayList<>();

@@ -30,7 +30,20 @@ public class DataSource {
     private String[] columns_alert_list = {
             DBHelper.alert_id,
             DBHelper.stock_pricelimit,
+            DBHelper.stock_pricelimit1
             //DBHelper.stock_alert,
+    };
+
+    private String[] columns_observation_list = {
+            DBHelper.observation_id,
+            DBHelper.observation_open,
+            DBHelper.observation_high,
+            DBHelper.observation_low,
+            DBHelper.observation_close,
+            DBHelper.observation_date,
+            DBHelper.observation_volume,
+            DBHelper.stock_id,
+
     };
 
 	
@@ -52,7 +65,7 @@ public class DataSource {
         Log.d(LOG_TAG, "Datenbank mit Hilfe des DbHelpers geschlossen.");
     }
 
-    public Equity createEquity(String symbol, int price, String date, String timezone){
+    public Equity createEquity(String symbol, double price, String date, String timezone){
         ContentValues columns_entry_list = new ContentValues();
         columns_entry_list.put(DBHelper.stock_value, price);
         columns_entry_list.put(DBHelper.stock_name, symbol);
@@ -75,9 +88,34 @@ public class DataSource {
 
 	  }
 
-    public Alert createPriceLimit(int pricelimit, long id){
+    public Equity.Observation createObservation(double open, double high, double low, double close, double volume, String date, long stock_id){
         ContentValues columns_entry_list = new ContentValues();
-        columns_entry_list.put(DBHelper.stock_pricelimit, pricelimit);
+        columns_entry_list.put(DBHelper.observation_open, open);
+        columns_entry_list.put(DBHelper.observation_high, high);
+        columns_entry_list.put(DBHelper.observation_low, low);
+        columns_entry_list.put(DBHelper.observation_close, close);
+        columns_entry_list.put(DBHelper.observation_date, date);
+        columns_entry_list.put(DBHelper.stock_id, stock_id);
+        columns_entry_list.put(DBHelper.observation_volume, volume);
+
+
+        long insertId = database.insert(DBHelper.table_observation, null, columns_entry_list);
+
+        Cursor cursor = database.query(DBHelper.table_observation, columns_observation_list, DBHelper.observation_id + "=" + insertId,
+                null, null, null, null);
+
+        cursor.moveToFirst();
+        Equity.Observation observation = cursorToObservation(cursor);
+        cursor.close();
+
+        return observation;
+
+    }
+
+    public Alert createPriceLimit(double upper, double lower,  long id){
+        ContentValues columns_entry_list = new ContentValues();
+        columns_entry_list.put(DBHelper.stock_pricelimit, upper);
+        columns_entry_list.put(DBHelper.stock_pricelimit1, lower);
         //columns_entry_list.put(DBHelper.stock_alert, false);
         columns_entry_list.put(DBHelper.stock_id, id);
 
@@ -97,20 +135,22 @@ public class DataSource {
 
     private Alert cursorToAlert(Cursor cursor) {
         int id_index = cursor.getColumnIndex(DBHelper.alert_id);
-        int id_pricelimit = cursor.getColumnIndex(DBHelper.stock_pricelimit);
+        int id_upper = cursor.getColumnIndex(DBHelper.stock_pricelimit);
+        int id_lower = cursor.getColumnIndex(DBHelper.stock_pricelimit1);
         //int id_alert = cursor.getColumnIndex(DBHelper.stock_alert);
         int id_stock = cursor.getColumnIndex(DBHelper.stock_id);
 
 
         long index = cursor.getLong(id_index);
-        int pricelimit = cursor.getInt(id_pricelimit);
+        long upper = cursor.getInt(id_upper);
+        long lower = cursor.getInt(id_lower);
         //Boolean alert = cursor.getBoolean(id_alert);
         long stock_id = cursor.getInt(id_stock);
 
 
 
 
-        Alert alert = new Alert(index, pricelimit, stock_id);
+        Alert alert = new Alert(index, upper, lower, stock_id);
 
         return alert;
     }
@@ -187,11 +227,11 @@ public class DataSource {
                 null);
     }
 
-    public void deleteAlert(Alert alert){
-        long id = alert.getID();
+    public void deleteAlert(Equity equity){
+        long id = equity.getId();
 
         database.delete(DBHelper.table_alert,
-                DBHelper.alert_id + "=" + id,
+                DBHelper.stock_id + "=" + id,
                 null);
     }
 
@@ -202,11 +242,17 @@ public class DataSource {
         database.update(DBHelper.table_stock, newValues, DBHelper.stock_id+"="+stock_id, null);
     }
 
-    public void updateAlert(double pricelimit, Alert alert){
+    public void updateAlert(double upper, double lower, Equity equity){
         ContentValues newValues = new ContentValues();
-        long alert_id = alert.getID();
-        newValues.put(DBHelper.stock_pricelimit, pricelimit);
-        database.update(DBHelper.table_alert, newValues, DBHelper.alert_id+"="+alert_id, null);
+        long equity_id = equity.getId();
+        newValues.put(DBHelper.stock_pricelimit, upper);
+        newValues.put(DBHelper.stock_pricelimit1,lower );
+        database.update(DBHelper.table_alert, newValues, DBHelper.stock_id+"="+equity_id, null);
+    }
+
+    public void DropEquities (){
+        database.execSQL("DROP TABLE IF EXISTS '" + DBHelper.table_stock + "'");
+
     }
 
 

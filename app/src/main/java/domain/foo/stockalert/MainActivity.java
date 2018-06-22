@@ -19,6 +19,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
 import org.json.JSONException;
 import org.json.*;
 
@@ -30,16 +32,23 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Equity> equityList;
     private CustomAdapter lvAdapter;
     private ListView equityListView;
+    private DataSource dataSource;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        dataSource = new DataSource(this);
+        dataSource.open();
+    }
+    @Override
+    protected void onStart() {
+        super.onStart();
         createAdapter();
     }
 
     public void createAdapter() {
-        equityList = new ArrayList<Equity>();
+        equityList = (ArrayList<Equity>) dataSource.getAllEquities();
 
         lvAdapter = new CustomAdapter(equityList, getApplicationContext());
         equityListView = (ListView) findViewById(R.id.equityList);
@@ -52,9 +61,10 @@ public class MainActivity extends AppCompatActivity {
                 Intent detailActivity = new Intent(MainActivity.this, DetailActivity.class);
                 detailActivity.putExtra("SYMBOL", symbol);
                 detailActivity.putExtra("EQUITY_JSON", equity.gsonMe());
-                startActivity(detailActivity);
+                startActivityForResult(detailActivity,1);
             }
         });
+
     }
 
     @Override
@@ -69,6 +79,20 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // TODO Auto-generated method stub
+        String eqgson=data.getStringExtra("EQ");
+        if(eqgson!=null && eqgson !=""){
+            Gson gson = new Gson();
+            Equity eq = gson.fromJson(eqgson, Equity.class);
+            dataSource.deleteEquity(eq);
+            equityList.remove(eq);
+            createAdapter();
+        }
+    }
+
 
     /***********************************
      * interval: TIME_SERIES_MONTHLY, TIME_SERIES_INTRADAY ...
@@ -88,11 +112,14 @@ public class MainActivity extends AppCompatActivity {
     public void requestDone(JSONObject q) {
         String interval = "";
         String debugHelper = "";
-        if (q != null) {
+        String response = (String) q.toString();
+        if (q != null && !response.contains("Error Message")) {
             Equity eq = new Equity(q);
             Toast.makeText(MainActivity.this, "Course(" + eq.getLatestDate() + ") is " + eq.getLatestClose() + " at " + eq.getLatestInterval() + " interval.", Toast.LENGTH_LONG).show();
             equityList.add(eq);
             lvAdapter.notifyDataSetChanged();
+            dataSource.createEquity(eq.getSymbol(), eq.getPrice(), eq.getDate(), eq.getTimezone());
+
         } else {
             Toast.makeText(MainActivity.this, "Symbol not found.", Toast.LENGTH_LONG).show();
         }
@@ -100,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void addSymbol() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("The name of the equityList of your choice. For example: MSFT");
+        builder.setTitle("The name of the Equity of your choice. For example: MSFT");
 
         // Set up the input
         final EditText input = new EditText(this);
