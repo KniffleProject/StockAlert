@@ -202,6 +202,7 @@ public class DataSource {
         String date = cursor.getString(id_date);
         String timezone = cursor.getString(id_timezone);
 
+            //hier allerts aus db lesen und dem eq object zuordnen
 
 
         Equity equity = new Equity(index,symbol,value, date, timezone );

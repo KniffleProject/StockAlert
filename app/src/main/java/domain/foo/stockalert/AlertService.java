@@ -100,14 +100,20 @@ public class AlertService {
 
 
         createNotificationChannel();
+        Intent intent_notification = new Intent(context, MainActivity.class);
+        intent_notification.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent_notification, 0);
+
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context,CHANNEL_ID)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContentTitle("StockAlert: "+eq.getSymbol())
                 .setSmallIcon(R.drawable.notification_icon)
+                .setContentIntent(pendingIntent)
                 .setContentText(message+limit);
 
 
         notificationManager.notify(1, mBuilder.build());
+        eq.resetLimits();
     }
 
     private void createNotificationChannel() {
