@@ -10,8 +10,11 @@ import android.os.Bundle;
 import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.anychart.anychart.AnyChart;
 import com.anychart.anychart.AnyChartView;
@@ -34,13 +37,21 @@ public class DetailActivity extends AppCompatActivity {
 
     private String symbol;
     private Equity eq;
+    private EditText upperLimit,lowerLimit;
+    private Button save,discard;
+    private DataSource dataSource;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        dataSource = DataSource.getInstance(this);
         setContentView(R.layout.activity_chart_common);
         AnyChartView anyChartView = findViewById(R.id.any_chart_view);
         anyChartView.setProgressBar(findViewById(R.id.progress_bar));
+        upperLimit = (EditText) findViewById(R.id.detailsUpperPriceLimit);
+        lowerLimit = (EditText) findViewById(R.id.detailsLowerPriceLimit);
+        save = (Button) findViewById(R.id.detailsSaveLimits);
+        discard= (Button) findViewById(R.id.detailsDiscardLimits);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
 
         Intent i = getIntent();
@@ -53,6 +64,24 @@ public class DetailActivity extends AppCompatActivity {
             eq.sortStockByDate();
             anyChartView.setChart(buildCartesian(eq));
         }
+    }
+
+    public void saveLimits(View v){
+        double upper= Double.parseDouble(upperLimit.getText().toString());
+        double lower= Double.parseDouble(lowerLimit.getText().toString());
+        if(eq.getUnder()==-1 && eq.getAbove()==-1){
+            dataSource.createPriceLimit(upper,lower,eq);
+        }else dataSource.updateAlert(upper,lower,eq);
+        eq.setUnder((long) lower);
+        eq.setAbove((long) upper);
+        Toast.makeText(DetailActivity.this, "Limits have been saved.", Toast.LENGTH_SHORT).show();
+        finish();
+    }
+
+    public void discardLimits(View v){
+        dataSource.deleteAlert(eq);
+        eq.resetLimits();
+        Toast.makeText(DetailActivity.this, "Limits have been discarded.", Toast.LENGTH_SHORT).show();
     }
 
     public Equity gsonToEquity(String json) {

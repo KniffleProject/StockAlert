@@ -40,27 +40,29 @@ public class MainActivity extends AppCompatActivity implements ApiCaller{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        dataSource = new DataSource(this);
+        dataSource = DataSource.getInstance(this);
         dataSource.open();
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onResume() {
+        super.onResume();
         createAdapter();
     }
 
     public void createAdapter() {
         equityList = (ArrayList<Equity>) dataSource.getAllEquities();
-
-        if(alertService == null){
-            alertService = new AlertService(equityList,this);
-            alertService.startService();
-        }else{
-            alertService.stopAlertService();
-            alertService = new AlertService(equityList,this);
-            alertService.startService();
-        }
+        ArrayList<Alert> alertList = (ArrayList<Alert>) dataSource.getAllAlerts();
+        if(alertList.size()>0) {
+            if (alertService == null) {
+                alertService = new AlertService(equityList, this, dataSource);
+                alertService.startService();
+            } else {
+                alertService.stopAlertService();
+                alertService = new AlertService(equityList, this, dataSource);
+                alertService.startService();
+            }
+        }else if(alertService!=null)alertService.stopAlertService();
 
         lvAdapter = new CustomAdapter(equityList, getApplicationContext());
         equityListView = (ListView) findViewById(R.id.equityList);
@@ -100,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements ApiCaller{
             if (eqgson != null && eqgson != "") {
                 Gson gson = new Gson();
                 Equity eq = gson.fromJson(eqgson, Equity.class);
+                dataSource.deleteAlert(eq);
                 dataSource.deleteEquity(eq);
                 equityList.remove(eq);
                 createAdapter();
@@ -131,9 +134,11 @@ public class MainActivity extends AppCompatActivity implements ApiCaller{
         if (q != null && !response.contains("Error Message")) {
             Equity eq = new Equity(q);
             Toast.makeText(MainActivity.this, "Course(" + eq.getLatestDate() + ") is " + eq.getLatestClose() + " at " + eq.getLatestInterval() + " interval.", Toast.LENGTH_LONG).show();
-            equityList.add(eq);
             lvAdapter.notifyDataSetChanged();
             dataSource.insertEquity(eq);
+            equityList.add(eq);
+            createAdapter();
+
 
         } else {
             Toast.makeText(MainActivity.this, "Symbol not found.", Toast.LENGTH_LONG).show();

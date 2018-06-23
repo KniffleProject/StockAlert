@@ -36,8 +36,17 @@ public class Equity implements ApiCaller {
     private long id;
     private boolean isAbove = false;
     private boolean isUnder = false;
-    private long above = 1000;
-    private long under = 1000;
+
+    public void setAbove(long above) {
+        this.above = above;
+    }
+
+    public void setUnder(long under) {
+        this.under = under;
+    }
+
+    private long above = -1;
+    private long under = -1;
 
     private ArrayList<Observation> stock = new ArrayList<>();
 
@@ -66,9 +75,7 @@ public class Equity implements ApiCaller {
     @Override
     public void requestDone(JSONObject json) {
         if (json != null) {
-            System.out.println();
             System.out.println(json.toString());
-            System.out.println();
             if (!json.toString().contains("Error Message") && !json.toString().contains("call frequency")) {
                 try {
                     Iterator<String> response = json.keys();
@@ -295,6 +302,8 @@ public class Equity implements ApiCaller {
     public void resetLimits() {
         above = -1;
         under = -1;
+        isAbove=false;
+        isUnder=false;
     }
 
 

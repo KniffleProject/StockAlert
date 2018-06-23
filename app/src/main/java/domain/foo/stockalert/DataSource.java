@@ -14,6 +14,8 @@ import java.util.List;
 public class DataSource {
 	
 	private static final String LOG_TAG = DataSource.class.getSimpleName();
+    private static DataSource instance;
+    private static Context context;
     private SQLiteDatabase database;
     private DBHelper dbHelper;
 	
@@ -47,8 +49,15 @@ public class DataSource {
 
     };
 
-	
-    public DataSource(Context context) {
+
+    public static DataSource getInstance(Context context){
+        if(instance==null) {
+            instance = new DataSource(context);
+        }
+        return instance;
+    }
+
+    private DataSource(Context context) {
         Log.d(LOG_TAG, "Unsere DataSource erzeugt jetzt den dbHelper.");
         dbHelper = new DBHelper(context); //a instance of DbHelper is initialized
     }
@@ -142,7 +151,9 @@ public class DataSource {
 //
 //    }
 
-    public Alert createPriceLimit(double upper, double lower,  long id){
+    public Alert createPriceLimit(double upper, double lower, Equity eq){
+
+        long id = eq.getId();
         ContentValues columns_entry_list = new ContentValues();
         columns_entry_list.put(DBHelper.stock_pricelimit, upper);
         columns_entry_list.put(DBHelper.stock_pricelimit1, lower);
@@ -202,10 +213,14 @@ public class DataSource {
         String date = cursor.getString(id_date);
         String timezone = cursor.getString(id_timezone);
 
-            //hier allerts aus db lesen und dem eq object zuordnen
+
 
 
         Equity equity = new Equity(index,symbol,value, date, timezone );
+
+        equity.setAbove(getUpperPrice(equity));
+        equity.setUnder(getLowerPrice(equity));
+
         Cursor observationCursor = database.query(DBHelper.table_observation, columns_observation_list, DBHelper.stock_id + "=" + index,
                 null, null, null, null);
 
@@ -308,6 +323,41 @@ public class DataSource {
     public void DropEquities (){
         database.execSQL("DROP TABLE IF EXISTS '" + DBHelper.table_stock + "'");
 
+    }
+
+    public long getUpperPrice(Equity eq){
+        long price = -1;
+        long id = eq.getId();
+        Cursor cursor = database.query(DBHelper.table_alert,
+                columns_alert_list, null,//DBHelper.stock_id+"="+id,
+                null, null, null, null);
+
+        cursor.moveToFirst();
+        while(!cursor.isAfterLast()){
+            Alert alert = cursorToAlert(cursor);
+            if(alert.stock_id==id) {
+                price = alert.getUpper();
+            }
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return price;
+    }
+
+    public long getLowerPrice(Equity eq){
+        long price = -1;
+        long id = eq.getId();
+        Cursor cursor = database.query(DBHelper.table_alert,
+                columns_alert_list, DBHelper.stock_id+"="+id,
+                null, null, null, null);
+        cursor.moveToFirst();
+        while(!cursor.isAfterLast()){
+            Alert alert = cursorToAlert(cursor);
+            price = alert.getLower();
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return price;
     }
 
 
