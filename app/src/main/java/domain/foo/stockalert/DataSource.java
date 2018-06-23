@@ -365,6 +365,15 @@ public class DataSource {
         return price;
     }
 
+    public boolean isEquityExcisting(Equity eq)
+    {
+        String symbol = eq.getSymbol();
+        Cursor cursor = database.query(DBHelper.table_stock,
+                columns_stock_list, DBHelper.stock_name+"="+symbol, null, null, null, null);
+        if(cursor!=null){
+            return true;
+        }else{return false;}
+    }
 
 	
 	
