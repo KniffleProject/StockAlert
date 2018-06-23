@@ -1,5 +1,6 @@
 package domain.foo.stockalert;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -27,12 +28,13 @@ import org.json.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ApiCaller{
     private String symbol = "";
     private ArrayList<Equity> equityList;
     private CustomAdapter lvAdapter;
     private ListView equityListView;
     private DataSource dataSource;
+    private AlertService alertService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         dataSource = new DataSource(this);
         dataSource.open();
     }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -49,6 +52,15 @@ public class MainActivity extends AppCompatActivity {
 
     public void createAdapter() {
         equityList = (ArrayList<Equity>) dataSource.getAllEquities();
+
+        if(alertService == null){
+            alertService = new AlertService(equityList,getApplicationContext());
+            alertService.startService();
+        }else{
+            alertService.stopAlertService();
+            alertService = new AlertService(equityList,getApplicationContext());
+            alertService.startService();
+        }
 
         lvAdapter = new CustomAdapter(equityList, getApplicationContext());
         equityListView = (ListView) findViewById(R.id.equityList);
@@ -61,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent detailActivity = new Intent(MainActivity.this, DetailActivity.class);
                 detailActivity.putExtra("SYMBOL", symbol);
                 detailActivity.putExtra("EQUITY_JSON", equity.gsonMe());
-                startActivityForResult(detailActivity,1);
+                startActivityForResult(detailActivity, 1);
             }
         });
 
@@ -83,13 +95,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // TODO Auto-generated method stub
-        String eqgson=data.getStringExtra("EQ");
-        if(eqgson!=null && eqgson !=""){
-            Gson gson = new Gson();
-            Equity eq = gson.fromJson(eqgson, Equity.class);
-            dataSource.deleteEquity(eq);
-            equityList.remove(eq);
-            createAdapter();
+        if (resultCode == Activity.RESULT_OK) {
+            String eqgson = data.getStringExtra("EQ");
+            if (eqgson != null && eqgson != "") {
+                Gson gson = new Gson();
+                Equity eq = gson.fromJson(eqgson, Equity.class);
+                dataSource.deleteEquity(eq);
+                equityList.remove(eq);
+                createAdapter();
+            }
         }
     }
 
@@ -109,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
     /*************************************
      * Wird aufgerufen sobald Daten da sind
      * **********************************/
+    @Override
     public void requestDone(JSONObject q) {
         String interval = "";
         String debugHelper = "";
@@ -118,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, "Course(" + eq.getLatestDate() + ") is " + eq.getLatestClose() + " at " + eq.getLatestInterval() + " interval.", Toast.LENGTH_LONG).show();
             equityList.add(eq);
             lvAdapter.notifyDataSetChanged();
-            dataSource.createEquity(eq.getSymbol(), eq.getPrice(), eq.getDate(), eq.getTimezone());
+            dataSource.insertEquity(eq);
 
         } else {
             Toast.makeText(MainActivity.this, "Symbol not found.", Toast.LENGTH_LONG).show();

@@ -28,4 +28,5 @@ dependencies {
     implementation 'com.googlecode.json-simple:json-simple:1.1'
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.github.AnyChart:AnyChart-Android:0.2.7'
+    implementation 'com.android.support:support-compat:26.1.1'
 }

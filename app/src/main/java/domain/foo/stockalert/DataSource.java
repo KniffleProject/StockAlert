@@ -30,7 +30,8 @@ public class DataSource {
     private String[] columns_alert_list = {
             DBHelper.alert_id,
             DBHelper.stock_pricelimit,
-            DBHelper.stock_pricelimit1
+            DBHelper.stock_pricelimit1,
+            DBHelper.stock_id
             //DBHelper.stock_alert,
     };
 
@@ -88,29 +89,58 @@ public class DataSource {
 
 	  }
 
-    public Equity.Observation createObservation(double open, double high, double low, double close, double volume, String date, long stock_id){
-        ContentValues columns_entry_list = new ContentValues();
-        columns_entry_list.put(DBHelper.observation_open, open);
-        columns_entry_list.put(DBHelper.observation_high, high);
-        columns_entry_list.put(DBHelper.observation_low, low);
-        columns_entry_list.put(DBHelper.observation_close, close);
-        columns_entry_list.put(DBHelper.observation_date, date);
-        columns_entry_list.put(DBHelper.stock_id, stock_id);
-        columns_entry_list.put(DBHelper.observation_volume, volume);
+	  public boolean insertEquity(Equity eq){
+            boolean success = true;
+          ContentValues columns_entry_list = new ContentValues();
+          columns_entry_list.put(DBHelper.stock_value, eq.getLatestClose());
+          columns_entry_list.put(DBHelper.stock_name, eq.getSymbol());
+          columns_entry_list.put(DBHelper.stock_date, eq.getLatestDate());
+          columns_entry_list.put(DBHelper.stock_timezone, eq.getTimezone());
+          long insertId1 = database.insert(DBHelper.table_stock, null, columns_entry_list);
+
+          if(insertId1!=-1){
+              for (Equity.Observation ob: eq.getStock()
+                      ) {
+                  ContentValues columns_entry_list_observation = new ContentValues();
+                  columns_entry_list_observation.put(DBHelper.observation_open, ob.open);
+                  columns_entry_list_observation.put(DBHelper.observation_high, ob.high);
+                  columns_entry_list_observation.put(DBHelper.observation_low, ob.low);
+                  columns_entry_list_observation.put(DBHelper.observation_close, ob.close);
+                  columns_entry_list_observation.put(DBHelper.observation_date, ob.printDatetime());
+                  columns_entry_list_observation.put(DBHelper.observation_volume, ob.volume);
+                  columns_entry_list_observation.put(DBHelper.stock_id, insertId1);
+                  long insertId2 = database.insert(DBHelper.table_observation, null, columns_entry_list_observation);
+                  if(insertId2==-1)success=false;
+              }
+          }else success=false;
+
+          return success;
+      }
 
 
-        long insertId = database.insert(DBHelper.table_observation, null, columns_entry_list);
-
-        Cursor cursor = database.query(DBHelper.table_observation, columns_observation_list, DBHelper.observation_id + "=" + insertId,
-                null, null, null, null);
-
-        cursor.moveToFirst();
-        Equity.Observation observation = cursorToObservation(cursor);
-        cursor.close();
-
-        return observation;
-
-    }
+//    public Equity.Observation createObservation(double open, double high, double low, double close, double volume, String date, long stock_id){
+//        ContentValues columns_entry_list = new ContentValues();
+//        columns_entry_list.put(DBHelper.observation_open, open);
+//        columns_entry_list.put(DBHelper.observation_high, high);
+//        columns_entry_list.put(DBHelper.observation_low, low);
+//        columns_entry_list.put(DBHelper.observation_close, close);
+//        columns_entry_list.put(DBHelper.observation_date, date);
+//        columns_entry_list.put(DBHelper.stock_id, stock_id);
+//        columns_entry_list.put(DBHelper.observation_volume, volume);
+//
+//
+//        long insertId = database.insert(DBHelper.table_observation, null, columns_entry_list);
+//
+//        Cursor cursor = database.query(DBHelper.table_observation, columns_observation_list, DBHelper.observation_id + "=" + insertId,
+//                null, null, null, null);
+//
+//        cursor.moveToFirst();
+//        Equity.Observation observation = cursorToObservation(cursor);
+//        cursor.close();
+//
+//        return observation;
+//
+//    }
 
     public Alert createPriceLimit(double upper, double lower,  long id){
         ContentValues columns_entry_list = new ContentValues();
@@ -175,6 +205,30 @@ public class DataSource {
 
 
         Equity equity = new Equity(index,symbol,value, date, timezone );
+        Cursor observationCursor = database.query(DBHelper.table_observation, columns_observation_list, DBHelper.stock_id + "=" + index,
+                null, null, null, null);
+
+
+        int id_open = observationCursor.getColumnIndex(DBHelper.observation_open);
+        int id_high = observationCursor.getColumnIndex(DBHelper.observation_high);
+        int id_low = observationCursor.getColumnIndex(DBHelper.observation_low);
+        int id_close = observationCursor.getColumnIndex(DBHelper.observation_close);
+        int id_datetime = observationCursor.getColumnIndex(DBHelper.observation_date);
+        int id_volume = observationCursor.getColumnIndex(DBHelper.observation_volume);
+
+        observationCursor.moveToFirst();
+
+        while(!observationCursor.isAfterLast()){
+            double open = observationCursor.getLong(id_open);
+            double high = observationCursor.getLong(id_high);
+            double low = observationCursor.getLong(id_low);
+            double close = observationCursor.getLong(id_close);
+            double volume= observationCursor.getLong(id_volume);
+            String datetime  = observationCursor.getString(id_datetime);
+            equity.addObservation(open,high,low,close,volume,datetime);
+            observationCursor.moveToNext();
+        }
+
 
         return equity;
     }

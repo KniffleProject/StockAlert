@@ -1,13 +1,19 @@
 package domain.foo.stockalert;
-//written by nick
+
+/**
+ * Created by NickHerold on 18.06.2018.
+ */
+
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+
 public class DBHelper extends SQLiteOpenHelper{
-	
+
+    //
 	private static final String LOG_TAG = DBHelper.class.getSimpleName();
     public static final String DB_name = "stock.db";
     public static final int DB_version = 2;
@@ -43,16 +49,29 @@ public class DBHelper extends SQLiteOpenHelper{
 
     //the SQL statements to create the tables
 	 public static final String SQL_CREATE_STOCKS =
-            "CREATE TABLE " + table_stock + " (" + stock_id + " INTEGER PRIMARY KEY AUTOINCREMENT, "+stock_name+
-                    " TEXT NOT NULL, "+stock_date+" TEXT NOT NULL, "+stock_value+" NUMERIC(6,2) NOT NULL, "+stock_timezone+" TEXT NOT NULL);";
+            "CREATE TABLE " + table_stock + " ("
+                    +stock_id + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    +stock_name+ " TEXT NOT NULL, "
+                    +stock_date+" TEXT NOT NULL, "
+                    +stock_value+" NUMERIC(6,2) NOT NULL, "
+                    +stock_timezone+" TEXT NOT NULL);";
 
-	 public static final String SQL_CREATE_LIMITS = "CREATE TABLE "+table_alert+" ("+alert_id+" INTEGER PRIMARY KEY AUTOINCREMENT, "+stock_pricelimit+" NUMERIC(6,2), "+stock_pricelimit1+" NUMERIC(6,2), "+
-             stock_id+" INTEGER, FOREIGN KEY("+stock_id+") REFERENCES "+table_stock+"("+stock_id+"));";
+	 public static final String SQL_CREATE_LIMITS = "CREATE TABLE "+table_alert+" ("
+             +alert_id+" INTEGER PRIMARY KEY AUTOINCREMENT, "
+             +stock_pricelimit+" NUMERIC(6,2), "
+             +stock_pricelimit1+" NUMERIC(6,2), "
+             +stock_id+" INTEGER, FOREIGN KEY("+stock_id+") REFERENCES "+table_stock+"("+stock_id+"));";
 
 
-    public static final String SQL_CREATE_OBSERVATION ="CREATE TABLE "+table_observation+" ("+observation_id+" INTEGER PRIMARY KEY AUTOINCREMENT, "
-            +observation_open+" NUMERIC(8,4), "+observation_high+" NUMERIC(8,4), "+observation_low+" NUMERIC(8,4), "+observation_close+" NUMERIC(8,4), " +
-            observation_volume+" NUMERIC(8,4), "+observation_date+" TEXT, "+stock_id+" INTEGER NOT NULL, FOREIGN KEY("+stock_id+") REFERENCES "+table_stock+"("+stock_id+"));";
+    public static final String SQL_CREATE_OBSERVATION ="CREATE TABLE "+table_observation+" ("
+            +observation_id+" INTEGER PRIMARY KEY AUTOINCREMENT, "
+            +observation_open+" NUMERIC(8,4), "
+            +observation_high+" NUMERIC(8,4), "
+            +observation_low+" NUMERIC(8,4), "
+            +observation_close+" NUMERIC(8,4), "
+            +observation_volume+" NUMERIC(8,4), "
+            +observation_date+" TEXT, "
+            +stock_id+" INTEGER NOT NULL, FOREIGN KEY("+stock_id+") REFERENCES "+table_stock+"("+stock_id+"));";
 			
 
 			

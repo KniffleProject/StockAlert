@@ -20,10 +20,10 @@ import java.nio.charset.Charset;
 public class ApiRequest extends AsyncTask<String,Integer,Void> {
 
     private JSONObject json;
-    private MainActivity activity;
+    private ApiCaller activity;
 
-    public ApiRequest(MainActivity activity) {
-        this.activity = activity;
+    public ApiRequest(ApiCaller caller) {
+        activity=caller;
     }
 
     public static String readAll(Reader rd) throws IOException {

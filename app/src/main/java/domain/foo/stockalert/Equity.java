@@ -24,19 +24,78 @@ import java.util.Iterator;
  * Created by hechtpapst on 22.06.2018.
  */
 
-public class Equity {
+public class Equity implements ApiCaller {
 
     private String symbol;
     private double latestClose;
     private String latestDate;
-    private String lastRefreshed="";
-    private String timeZone="";
-    private String latestInterval="";
+    private String lastRefreshed = "";
+    private String timeZone = "";
+    private String latestInterval = "";
+    private String apiRequestCurrentShare = "";
     private long id;
+    private boolean isAbove = false;
+    private boolean isUnder = false;
+    private long above = 1000;
+    private long under = 1000;
 
-    private ArrayList<Observation> stock= new ArrayList<>();
+    private ArrayList<Observation> stock = new ArrayList<>();
 
-    class Observation implements Comparable<Observation>{
+    public long getAbove() {
+        return above;
+    }
+
+    public boolean isAbove() {
+        return isAbove;
+    }
+
+    public boolean isUnder() {
+        return isUnder;
+    }
+
+    public long getUnder() {
+        return under;
+    }
+
+    public void selfUpdate() {
+        ApiRequest ar = new ApiRequest(this);
+        ar.execute(apiRequestCurrentShare);
+    }
+
+
+    @Override
+    public void requestDone(JSONObject json) {
+        if (json != null) {
+            System.out.println();
+            System.out.println(json.toString());
+            System.out.println();
+            if (!json.toString().contains("Error Message") && !json.toString().contains("call frequency")) {
+                try {
+                    Iterator<String> response = json.keys();
+                    String interval = "";
+                    while (response.hasNext()) {
+                        interval = (String) response.next();
+                        if (interval.equals("Meta Data")) {
+                            JSONObject meta = (JSONObject) json.get(interval);
+                            lastRefreshed = (String) meta.get("3. Last Refreshed");
+                        }
+                    }
+                    JSONObject dataSeries = null;
+                    dataSeries = (JSONObject) json.get(interval);
+                    if (interval.contains("Time Series")) {
+                        latestInterval = interval;
+                        updateObservations(dataSeries);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+    }
+
+
+    class Observation implements Comparable<Observation> {
         double open;
         double close;
         double high;
@@ -45,14 +104,14 @@ public class Equity {
         Date datetime;
 
 
-        public Observation(double open, double high, double low, double close, double volume, String datetime){
+        public Observation(double open, double high, double low, double close, double volume, String datetime) {
             this.open = open;
             this.close = close;
-            this.low=low;
-            this.high=high;
-            this.volume=volume;
-            if (datetime.length()<11){
-                datetime+=" 00:00:00";
+            this.low = low;
+            this.high = high;
+            this.volume = volume;
+            if (datetime.length() < 11) {
+                datetime += " 00:00:00";
             }
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             try {
@@ -62,6 +121,11 @@ public class Equity {
             }
         }
 
+        public String printDatetime() {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            return formatter.format(datetime);
+        }
+
         @Override
         public int compareTo(@NonNull Observation o) {
             return this.datetime.compareTo(o.datetime);
@@ -69,8 +133,8 @@ public class Equity {
     }
 
 
-    public void sortStockByDate(){
-        Collections.sort(stock, new Comparator<Observation>(){
+    public void sortStockByDate() {
+        Collections.sort(stock, new Comparator<Observation>() {
             @Override
             public int compare(Observation o1, Observation o2) {
                 return o1.compareTo(o2);
@@ -86,16 +150,20 @@ public class Equity {
     }
 
 
-    public Equity(long id, String symbol, double latestClose, String latestDate, String timezone){
+    public Equity(long id, String symbol, double latestClose, String latestDate, String timezone) {
         this.id = id;
         this.symbol = symbol;
         this.latestClose = latestClose;
         this.latestDate = latestDate;
         this.timeZone = timezone;
+        this.apiRequestCurrentShare = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + symbol +
+                "&interval=1min&outputsize=compact&apikey=CEVLFXSSNL84YSA5"; //Api Request der letzten 100 min für diese Equity
 
     }
 
-    public long getId(){return id;}
+    public long getId() {
+        return id;
+    }
 
     public String getLatestDate() {
         return latestDate;
@@ -109,7 +177,7 @@ public class Equity {
         return latestInterval;
     }
 
-    public ArrayList<Observation> getStock(){
+    public ArrayList<Observation> getStock() {
         return stock;
     }
 
@@ -122,9 +190,8 @@ public class Equity {
     }
 
 
-
-    public String gsonMe(){
-        String json ="";
+    public String gsonMe() {
+        String json = "";
         Gson gson = new Gson();
         json = gson.toJson(this);
         return json;
@@ -132,31 +199,48 @@ public class Equity {
 
     public void fillFromJson(JSONObject json) {
         try {
-            String interval ="";
-            String timeseries ="";
+            String interval = "";
             Iterator<String> response = json.keys();
             while (response.hasNext()) {
-                interval = (String) response.next();
-                if(interval.equals("Meta Data")){
+                interval = response.next();
+                if (interval.equals("Meta Data")) {
                     JSONObject meta = (JSONObject) json.get(interval);
-                    symbol=(String) meta.get("2. Symbol");
-                    lastRefreshed= (String) meta.get("3. Last Refreshed");
-                    timeZone =(String) meta.get("4. Time Zone");
+                    symbol = (String) meta.get("2. Symbol");
+                    apiRequestCurrentShare = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + symbol +
+                            "&interval=1min&outputsize=compact&apikey=CEVLFXSSNL84YSA5"; //Api Request der letzten 100 min für diese Equity
+                    lastRefreshed = (String) meta.get("3. Last Refreshed");
+                    timeZone = (String) meta.get("4. Time Zone");
                 }
             }
             JSONObject dataSeries = (JSONObject) json.get(interval);
-            latestInterval=interval;
-            Iterator<String> observations = dataSeries.keys();
+            if (interval.contains("Time Series")) {
+                latestInterval = interval;
+                updateObservations(dataSeries);
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+        }
+        latestClose = stock.get(1).close;
+        latestDate = stock.get(1).printDatetime();
+
+    }
+
+    public boolean updateObservations(JSONObject dataSeries) {
+        Iterator<String> observations = dataSeries.keys();
+        boolean success = true;
+        try {
             while (observations.hasNext()) {
                 JSONObject observationData = null;
-                String datetime=observations.next();
+                String datetime = observations.next();
                 observationData = (JSONObject) dataSeries.get(datetime);
                 Iterator<String> keys = observationData.keys();
-                double open=0;
-                double close=0;
-                double high=0;
-                double low=0;
-                double volume=0;
+                double open = 0;
+                double close = 0;
+                double high = 0;
+                double low = 0;
+                double volume = 0;
                 while (keys.hasNext()) {
                     String key = keys.next();
                     switch (key) {
@@ -177,20 +261,21 @@ public class Equity {
                             break;
                     }
                 }
-                Observation newEntry = new Observation(open,high,low,close,volume, datetime);
+                if ((above != -1) && (high > above)) isAbove = true;
+                if ((under != -1) && (low < under)) isUnder = true;
+                Observation newEntry = new Observation(open, high, low, close, volume, datetime);
                 stock.add(newEntry);
             }
         } catch (JSONException e) {
             e.printStackTrace();
-
+            success = false;
         }
-        latestClose =stock.get(1).close;
-        latestDate =stock.get(1).datetime.toString();
+        return success;
+    }
 
-        }
-
-    public void addObservation(Observation obs){
-        stock.add(obs);
+    public void addObservation(double open, double high, double low, double close, double volume, String datetime) {
+        Observation newEntry = new Observation(open, high, low, close, volume, datetime);
+        stock.add(newEntry);
     }
 
     public double getPrice() {
@@ -203,6 +288,11 @@ public class Equity {
 
     public String getTimezone() {
         return timeZone;
+    }
+
+    public void resetLimits() {
+        above = -1;
+        under = -1;
     }
 
 
