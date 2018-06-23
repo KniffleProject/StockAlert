@@ -148,7 +148,7 @@ public class DetailActivity extends AppCompatActivity {
 
         cartesian.getTooltip().setPositionMode(TooltipPositionMode.POINT);
         cartesian.getYAxis().setTitle("share value in €");
-        cartesian.setTitle("Microsoft Aktien");
+        cartesian.setTitle(eq.getStock().get(1).printDatetime() +" - " + eq.getStock().get(eq.getStock().size()-1).printDatetime());
         cartesian.getXAxis().getLabels().setPadding(5d, 5d, 5d, 5d);
         Set set = makeSeriesData(eq);
         Mapping series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
