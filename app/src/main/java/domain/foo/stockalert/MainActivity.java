@@ -54,11 +54,11 @@ public class MainActivity extends AppCompatActivity implements ApiCaller{
         equityList = (ArrayList<Equity>) dataSource.getAllEquities();
 
         if(alertService == null){
-            alertService = new AlertService(equityList,getApplicationContext());
+            alertService = new AlertService(equityList,this);
             alertService.startService();
         }else{
             alertService.stopAlertService();
-            alertService = new AlertService(equityList,getApplicationContext());
+            alertService = new AlertService(equityList,this);
             alertService.startService();
         }
 

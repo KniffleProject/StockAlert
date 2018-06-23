@@ -84,7 +84,7 @@ public class Equity implements ApiCaller {
                     dataSeries = (JSONObject) json.get(interval);
                     if (interval.contains("Time Series")) {
                         latestInterval = interval;
-                        updateObservations(dataSeries);
+                        updateObservations(dataSeries,false);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -215,7 +215,7 @@ public class Equity implements ApiCaller {
             JSONObject dataSeries = (JSONObject) json.get(interval);
             if (interval.contains("Time Series")) {
                 latestInterval = interval;
-                updateObservations(dataSeries);
+                updateObservations(dataSeries,true);
             }
 
         } catch (JSONException e) {
@@ -227,7 +227,7 @@ public class Equity implements ApiCaller {
 
     }
 
-    public boolean updateObservations(JSONObject dataSeries) {
+    public boolean updateObservations(JSONObject dataSeries, boolean keepData) {
         Iterator<String> observations = dataSeries.keys();
         boolean success = true;
         try {
@@ -263,8 +263,10 @@ public class Equity implements ApiCaller {
                 }
                 if ((above != -1) && (high > above)) isAbove = true;
                 if ((under != -1) && (low < under)) isUnder = true;
-                Observation newEntry = new Observation(open, high, low, close, volume, datetime);
-                stock.add(newEntry);
+                if(keepData) {
+                    Observation newEntry = new Observation(open, high, low, close, volume, datetime);
+                    stock.add(newEntry);
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();

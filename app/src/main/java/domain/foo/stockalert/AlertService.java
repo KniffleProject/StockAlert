@@ -1,10 +1,12 @@
 package domain.foo.stockalert;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -27,6 +29,7 @@ public class AlertService {
     private Context context;
     private ArrayList<Equity> equityList;
     private ScheduledExecutorService service;
+    private String CHANNEL_ID="some_channel_id";
     //private Map<String,Long> above = new HashMap<String, Long>();
     //private Map<String,Long> under = new HashMap<String, Long>();
 
@@ -74,7 +77,7 @@ public class AlertService {
         };
 
         this.service = Executors.newSingleThreadScheduledExecutor();
-        service.scheduleAtFixedRate(runnable, 0, 1, TimeUnit.SECONDS);
+        service.scheduleAtFixedRate(runnable, 0, 10, TimeUnit.SECONDS);
     }
 
     public void stopAlertService(){
@@ -90,17 +93,36 @@ public class AlertService {
         else{limit = eq.getUnder();}
 
         String symbol = eq.getSymbol();
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         int notifyId = 1;
-        String channelId = "some_channel_id";
 
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context, channelId)
 
+
+        createNotificationChannel();
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context,CHANNEL_ID)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContentTitle("StockAlert: "+eq.getSymbol())
+                .setSmallIcon(R.drawable.notification_icon)
                 .setContentText(message+limit);
 
 
         notificationManager.notify(1, mBuilder.build());
+    }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "myChannel";
+            String description = "This is my Channel";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 }

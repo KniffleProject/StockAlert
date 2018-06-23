@@ -21,15 +21,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="TextView" />
+                android:text="Upper Limit" />
 
             <EditText
-                android:id="@+id/editText4"
+                android:id="@+id/detailsUpperPriceLimit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:ems="10"
-                android:inputType="number" />
+                android:inputType="number"
+                android:text="90" />
         </LinearLayout>
 
         <LinearLayout
@@ -42,22 +43,37 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="TextView" />
+                android:text="Lower Limit" />
 
             <EditText
-                android:id="@+id/editText5"
+                android:id="@+id/detailsLowerPriceLimit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:ems="10"
-                android:inputType="number" />
+                android:inputType="number"
+                android:text="90" />
         </LinearLayout>
 
-        <Button
-            android:id="@+id/button"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Button" />
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/detailsSaveLimits"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="save" />
+
+            <Button
+                android:id="@+id/detailsDiscardLimits"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="discard" />
+        </LinearLayout>
 
         <ProgressBar
             android:id="@+id/progress_bar"
