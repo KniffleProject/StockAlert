@@ -32,6 +32,11 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
+/**
+ * Jan Paul Schulz
+ * Nick Herold
+ * Hauke Hoppe
+ */
 
 public class DetailActivity extends AppCompatActivity {
 

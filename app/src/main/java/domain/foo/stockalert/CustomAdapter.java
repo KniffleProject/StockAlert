@@ -18,8 +18,11 @@ import domain.foo.stockalert.R;
 
 
 /**
- * Created by anupamchugh on 09/02/16.
+ * Jan Paul Schulz
+ * Nick Herold
+ * Hauke Hoppe
  */
+
 public class CustomAdapter extends ArrayAdapter<Equity> implements View.OnClickListener{
 
     private ArrayList<Equity> dataSet;

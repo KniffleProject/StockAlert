@@ -1,6 +1,11 @@
 package domain.foo.stockalert;
 
-//written by nick
+/**
+ * Jan Paul Schulz
+ * Nick Herold
+ * Hauke Hoppe
+ */
+
 
 public class Alert {
     long alert_id;

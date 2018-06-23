@@ -14,8 +14,11 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 /**
- * Created by hechtpapst on 17.06.2018.
+ * Jan Paul Schulz
+ * Nick Herold
+ * Hauke Hoppe
  */
+
 
 public class ApiRequest extends AsyncTask<String,Integer,Void> {
 

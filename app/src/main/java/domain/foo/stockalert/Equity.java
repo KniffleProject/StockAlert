@@ -21,8 +21,11 @@ import java.util.Iterator;
 
 
 /**
- * Created by hechtpapst on 22.06.2018.
+ * Jan Paul Schulz
+ * Nick Herold
+ * Hauke Hoppe
  */
+
 
 public class Equity implements ApiCaller {
 

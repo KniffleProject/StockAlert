@@ -21,7 +21,9 @@ import java.util.concurrent.TimeUnit;
 import static android.content.Context.NOTIFICATION_SERVICE;
 
 /**
- * Created by hechtpapst on 22.06.2018.
+ * Jan Paul Schulz
+ * Nick Herold
+ * Hauke Hoppe
  */
 
 public class AlertService {

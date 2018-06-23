@@ -1,5 +1,10 @@
 package domain.foo.stockalert;
-//written by nick
+/**
+ * Jan Paul Schulz
+ * Nick Herold
+ * Hauke Hoppe
+ */
+
 
 
 import android.content.Context;

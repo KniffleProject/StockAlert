@@ -27,6 +27,11 @@ import org.json.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+/**
+ * Jan Paul Schulz
+ * Nick Herold
+ * Hauke Hoppe
+ */
 
 public class MainActivity extends AppCompatActivity implements ApiCaller{
     private String symbol = "";

@@ -1,7 +1,9 @@
 package domain.foo.stockalert;
 
 /**
- * Created by NickHerold on 18.06.2018.
+ * Jan Paul Schulz
+ * Nick Herold
+ * Hauke Hoppe
  */
 
 
